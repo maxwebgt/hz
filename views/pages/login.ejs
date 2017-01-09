@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>login</title>
+</head>
+<body>
+	<div class="">
+		<form action="">
+			<div>username <input id="username" type="text"></div>
+		
+			<div>password <input id="password" type="text"></div>
+			<input type="submit" onclick="otpravka();return false" value="login">
+			<a href="/">Зарегистрироваться</a>
+			<div id="info">Поле для информации</div>
+		</form>
+		
+	</div>
+	<script>
+		function otpravka() {
+			var xhr = new XMLHttpRequest();
+			var params = 'username=' + encodeURIComponent(username.value) + '&password=' + 	encodeURIComponent(password.value);
+//		var params = 'username=asdasdasdasd' + '&password=sssssssssssssss';	
+			xhr.open("POST", '/login', true);
+			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			xhr.send(params);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == 4) {
+					if(xhr.status == 200) {
+						if (xhr.responseText == 'пароль верный') {
+							location = 'http://localhost:3000/auth';
+						}
+						else {
+							info.innerHTML =  xhr.responseText;	
+						}
+					}
+				}
+			};
+			
+		}
+		
+	</script>
+</body>
+</html>

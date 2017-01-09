@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<h1>Register form</h1>
+	<form action="">
+		<div>
+			<span>Username</span>
+			<input id="username" type="text">
+		</div>
+		<div>
+			<span>Password</span>
+			<input id="password" type="text">
+		</div>
+		<div>
+			<span>Confirm Password</span>
+			<input id="repeatpassword" type="text">
+		</div>
+		<div id="info">Информация</div>
+		<button onclick="validate();return false">Зарегистрироваться</button>		
+		<a href="/login">Авторизоваться</a>
+		
+
+	</form>
+	<script>
+		var errmes;
+		function validate() {
+			passcheck(password.value, repeatpassword.value);
+			if (errmes) {
+				info.innerHTML = errmes;
+			} else {
+				info.innerHTML = 'Пароли совпадают.';
+				otpravka();
+			}
+
+		}
+		
+		function passcheck(passone, passtwo) {
+			if (passone.length <= 2 || passtwo.length <= 2 ) {
+				errmes = 'пароль слишком короткий';	
+			}
+			if (passone !== passtwo) {
+				errmes = 'пароли не совпадают';
+			} else {
+				errmes = false;
+			}
+		}
+		function otpravka() {
+			var xhr = new XMLHttpRequest();
+			var params = 'username=' + encodeURIComponent(username.value) + '&password=' + 	encodeURIComponent(password.value);
+
+			xhr.open("POST", '/', true);
+			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			xhr.send(params);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == 4) {
+					if(xhr.status == 200) {
+						
+						if (xhr.responseText == 'success') {
+							location = 'http://localhost:3000/login';
+						}
+						else {
+							info.innerHTML =  xhr.responseText;
+						}
+					}
+				}
+			};
+			
+		}
+	</script>
+</body>
+</html>
