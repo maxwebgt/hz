@@ -276,10 +276,8 @@ webSocketServer.on('connection', function(ws) {
 // function trueUser(str) {
 //     var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
 //     var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-//     // var sUser = 'lol';
 //     sessionStore.load(sid, function(err, session) {
 //         var did = new ObjectID(session.user);
-//
 //         User.findById(did, function(err, user) {
 //             sUser = user.username;
 //             console.log('ZZ:' + sUser);
@@ -287,3 +285,19 @@ webSocketServer.on('connection', function(ws) {
 // 	});
 // 	return sUser;
 // }
+///////////////////// ROMAN
+// function trueUser(str, callback) {
+//     var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
+//     var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
+//     sessionStore.load(sid, function(err, session) {
+//         var did = new ObjectID(session.user);
+//         User.findById(did, function(err, user) {
+//             sUser = user.username;
+//             console.log('ZZ:' + sUser);
+//             callback(sUser);
+//         })
+//     });
+// }
+// trueUser(str, (sUser) => {
+//     sUser // твой юзверь
+// })
