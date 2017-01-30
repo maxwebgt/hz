@@ -22,6 +22,7 @@
     "express": "^4.14.0",
     "express-session": "^1.14.2",
     "mongodb": "^2.2.19",
-    "mongoose": "^4.7.6"
+    "mongoose": "^4.7.6",
+    "ws": "^1.1.1"
   }
 }

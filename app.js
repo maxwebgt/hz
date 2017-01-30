@@ -13,6 +13,9 @@ var cParser = require("cookie-parser");
 
 var sessionStore = require('./libs/sessionStore');
 
+// var trueUser = require('./libs/username');
+
+
 var app = express();
 
 
@@ -169,37 +172,45 @@ var webSocketServer = new WebSocketServer.Server({
 
 
 webSocketServer.on('connection', function(ws) {
-	console.log(ws.upgradeReq.headers.cookie);
-    var cookies = cookie.parse(ws.upgradeReq.headers.cookie);
+    var id = Math.random();
+    clients[id] = ws;
+	var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
     var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-    // console.log(cookies);
-    // console.log(sid);
-
     sessionStore.load(sid, function(err, session) {
-       // console.log(session);
-       //  console.log(session.user);
         var did = new ObjectID(session.user);
         User.findById(did, function(err, user) {
-			// console.log(user);
-        });
+            console.log('ZZ:' + user.username);
+                otvet = {
+                	type: 'addonline',
+					author: user.username,
+                    date: new Date()
+                };
+                for (var key in clients) {
+                    clients[key].send(JSON.stringify(otvet));
+                }
+        })
     });
 
 
-    var id = Math.random();
-    clients[id] = ws;
-    console.log("новое соединение " + id);
 
+
+
+	// console.log('clients:', clients);
     ws.on('message', function(message) {
-        console.log('получено сообщение ' + message);
-
-        var cookies = cookie.parse(ws.upgradeReq.headers.cookie);
+        console.log('//////////////////////////////////////////');
+        var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
         var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
         sessionStore.load(sid, function(err, session) {
-            // console.log(session);
-            //  console.log(session.user);
             var did = new ObjectID(session.user);
-            User.findById(did, function(err, user) {
+
+		User.findById(did, function(err, user) {
+                // otvet = {
+                //     author: user.username,
+                //     text: message,
+                //     date: new Date()
+                // };
                 otvet = {
+                	type: 'addmes',
                     author: user.username,
                     text: message,
                     date: new Date()
@@ -217,20 +228,62 @@ webSocketServer.on('connection', function(ws) {
     ws.on('close', function() {
         console.log('соединение закрыто ' + id);
         delete clients[id];
+
+        var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
+        var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
+        sessionStore.load(sid, function(err, session) {
+            var did = new ObjectID(session.user);
+
+            User.findById(did, function(err, user) {
+                otvet = {
+                    type: 'remonline',
+                    author: user.username
+                };
+                for (var key in clients) {
+                    clients[key].send(JSON.stringify(otvet));
+                }
+            });
+        });
+
+
+
+
     });
 
 });
 
-// function otpravka() {
-//     var cookies = cookie.parse(ws.upgradeReq.headers.cookie);
+
+
+// function trueUser(str) {
+//     var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
 //     var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
+//
 //     sessionStore.load(sid, function(err, session) {
-//         console.log(session);
-//         console.log(session.user);
 //         var did = new ObjectID(session.user);
 //         User.findById(did, function(err, user) {
-//             // res.json(user);
-//             console.log(user);
-//         });
 //
+//             console.log('ZZ:' + user.username);
+//
+//         })
+//     });
+//
+// }
+
+
+
+
+
+// function trueUser(str) {
+//     var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
+//     var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
+//     // var sUser = 'lol';
+//     sessionStore.load(sid, function(err, session) {
+//         var did = new ObjectID(session.user);
+//
+//         User.findById(did, function(err, user) {
+//             sUser = user.username;
+//             console.log('ZZ:' + sUser);
+//         })
+// 	});
+// 	return sUser;
 // }

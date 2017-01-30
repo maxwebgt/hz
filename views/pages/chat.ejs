@@ -23,30 +23,7 @@
                 </div>
                 <div id="messblock" class="panel-body">
                     <ul id="messlist" class="media-list">
-                        <li class="media">
-                            <div class="media-body">
-                                <div class="media">
 
-                                    <div class="media-body">
-                                        Donec sit amet ligula enim. Duis vel condimentum massa. Donec sit amet ligula enim. Duis vel condimentum massa.Donec sit amet ligula enim. Duis vel condimentum massa. Donec sit amet ligula enim. Duis vel condimentum massa.<br>
-                                        <small class="text-muted">Alex Deo | 23rd June at 5:00pm</small>
-                                        <hr>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="media">
-                            <div class="media-body">
-                                <div class="media">
-
-                                    <div class="media-body">
-                                        Donec sit amet ligula enim. Duis vel condimentum massa. Donec sit amet ligula enim. Duis vel condimentum massa.Donec sit amet ligula enim. Duis vel condimentum massa. Donec sit amet ligula enim. Duis vel condimentum massa.<br>
-                                        <small class="text-muted">Jhon Rexa | 23rd June at 5:00pm</small>
-                                        <hr>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
                     </ul>
                 </div>
                 <div class="panel-footer">
@@ -66,26 +43,7 @@
                 </div>
                 <div class="panel-body">
                     <ul id="onlineUsers" class="media-list">
-                        <li class="media">
-                            <div class="media-body">
-                                <div class="media">
 
-                                    <div class="media-body">
-                                        <h5>Alex Deo | User</h5><small class="text-muted">Active From 3 hours</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="media">
-                            <div class="media-body">
-                                <div class="media">
-
-                                    <div class="media-body">
-                                        <h5>Jhon Rexa | User</h5><small class="text-muted">Active From 3 hours</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
                     </ul>
                 </div>
             </div>
@@ -98,19 +56,31 @@
 
     function sendMes(str) {
         socket.send(str);
-//        socket.send({ author:'author', str:'strING', date: "DATE"});
     }
 
     socket.onmessage = function(event) {
         console.log(event.data);
         msg = JSON.parse(event.data);
-        addMes(msg.author, msg.text, msg.date);
-        fix();
+
+        if (msg.type === 'addonline') {
+            if (!document.querySelector('li[name=' + msg.author + ']')) {
+                adduser(msg.author, msg.date);
+            }
+        }
+        if (msg.type === 'addmes') {
+            addMes(msg.author, msg.text, msg.date);
+            fix();
+        }
+        if (msg.type === 'remonline') {
+            document.querySelector('li[name=' + msg.author + ']').remove();
+        }
+
+
     };
 
-    socket.onopen = function(event) {
-       adduser('sssssss','last');
-    };
+//    socket.onopen = function(event) {
+//       adduser('sssssss','last');
+//    };
 
     function addMes(author, mess, date) {
 
@@ -129,7 +99,7 @@
 
     function adduser(user, lastOnline) {
 
-        li = createElement('li', {'class':'media'});
+        li = createElement('li', {'class':'media', 'name': user});
         div = createElement('div', {'class':'media-body'});
         div2 = createElement('div', {'class':'media'});
         // a = createElement('a', {'class':'pull-left', 'href':'#'});
