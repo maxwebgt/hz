@@ -7,7 +7,6 @@ module.exports = function(req, res, next) {
 	
 	User.findById(req.session.user, function(err, user) {
 		if (err) return next(err);
-		
 		req.user = res.locals.user = user;
 		next();
 	})

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author"><!--[if IE]>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <![endif]-->
+    <title>BOOTSTRAP CHAT</title><!-- BOOTSTRAP CORE STYLE CSS -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
+</head>
+<body style="font-family:Verdana">
+<div class="container">
+    <div class="row" style="padding-top:40px;">
+        <h3 class="text-center">HELLO, <%= user.get('username') %></h3><br>
+        <br>
+        <div class="col-md-8">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    RECENT CHAT HISTORY
+                </div>
+                <div id="messblock" class="panel-body">
+                    <ul id="messlist" class="media-list">
+                        <li class="media">
+                            <div class="media-body">
+                                <div class="media">
+
+                                    <div class="media-body">
+                                        Donec sit amet ligula enim. Duis vel condimentum massa. Donec sit amet ligula enim. Duis vel condimentum massa.Donec sit amet ligula enim. Duis vel condimentum massa. Donec sit amet ligula enim. Duis vel condimentum massa.<br>
+                                        <small class="text-muted">Alex Deo | 23rd June at 5:00pm</small>
+                                        <hr>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="media">
+                            <div class="media-body">
+                                <div class="media">
+
+                                    <div class="media-body">
+                                        Donec sit amet ligula enim. Duis vel condimentum massa. Donec sit amet ligula enim. Duis vel condimentum massa.Donec sit amet ligula enim. Duis vel condimentum massa. Donec sit amet ligula enim. Duis vel condimentum massa.<br>
+                                        <small class="text-muted">Jhon Rexa | 23rd June at 5:00pm</small>
+                                        <hr>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="panel-footer">
+                    <div class="input-group">
+                        <input id="inputmes" type="text" class="form-control" placeholder="Enter Message" />
+                        <span class="input-group-btn">
+                                <button onclick="sendMes(inputmes.value)" class="btn btn-info" type="button">SEND</button>
+                            </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    ONLINE USERS
+                </div>
+                <div class="panel-body">
+                    <ul id="onlineUsers" class="media-list">
+                        <li class="media">
+                            <div class="media-body">
+                                <div class="media">
+
+                                    <div class="media-body">
+                                        <h5>Alex Deo | User</h5><small class="text-muted">Active From 3 hours</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="media">
+                            <div class="media-body">
+                                <div class="media">
+
+                                    <div class="media-body">
+                                        <h5>Jhon Rexa | User</h5><small class="text-muted">Active From 3 hours</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var socket = new WebSocket("ws://localhost:8081");
+
+
+    function sendMes(str) {
+        socket.send(str);
+//        socket.send({ author:'author', str:'strING', date: "DATE"});
+    }
+
+    socket.onmessage = function(event) {
+        console.log(event.data);
+        msg = JSON.parse(event.data);
+        addMes(msg.author, msg.text, msg.date);
+        fix();
+    };
+
+    socket.onopen = function(event) {
+       adduser('sssssss','last');
+    };
+
+    function addMes(author, mess, date) {
+
+        li = createElement('li', {'class':'media'});
+        div = createElement('div', {'class':'media-body'});
+        div2 = createElement('div', {'class':'media'});
+        // a = createElement('a', {'class':'pull-left', 'href':'#'});
+        // img = createElement('img', {'class':'media-object img-circle', 'src':'assets/img/user.gif'});
+        messlist.appendChild(li).appendChild(div).appendChild(div2); //.appendChild(a).appendChild(img);
+        div3 = createElement('div', {'class':'media-body'}, mess);
+        div2.appendChild(div3);
+        small = createElement('small', {'class':'text-muted'}, author + ' | ' + date);
+        div2.appendChild(small);
+        div2.appendChild(document.createElement('hr'));
+    }
+
+    function adduser(user, lastOnline) {
+
+        li = createElement('li', {'class':'media'});
+        div = createElement('div', {'class':'media-body'});
+        div2 = createElement('div', {'class':'media'});
+        // a = createElement('a', {'class':'pull-left', 'href':'#'});
+        // img = createElement('img', {'class':'media-object img-circle', 'src':'assets/img/user.gif'});
+        onlineUsers.appendChild(li).appendChild(div).appendChild(div2); //.appendChild(a).appendChild(img);
+        div3 = createElement('div', {'class':'media-body'}, '');
+        div2.appendChild(div3);
+        small = createElement('small', {'class':'text-muted'}, lastOnline);
+        head = createElement('h5',{},user);
+        div3.appendChild(head);
+        div3.appendChild(small);
+//        div2.appendChild(document.createElement('hr'));
+    }
+
+    function fix() {
+        var block = document.getElementById("messblock");
+        block.scrollTop = block.scrollHeight;
+
+    }
+
+
+    function createElement(element, attribute, inner) {
+        if (typeof(element) === "undefined") {
+            return false;
+        }
+        if (typeof(inner) === "undefined") {
+            inner = "";
+        }
+        var el = document.createElement(element);
+        if (typeof(attribute) === 'object') {
+            for (var key in attribute) {
+                el.setAttribute(key, attribute[key]);
+            }
+        }
+        // if (!Array.isArray(inner)) {
+        //     inner = [inner];
+        // }
+        for (var k = 0; k < inner.length; k++) {
+            if (inner[k].tagName) {
+                el.appendChild(inner[k]);
+            } else {
+                el.appendChild(document.createTextNode(inner[k]));
+            }
+        }
+        return el;
+    }
+
+</script>
+</body>
+</html>

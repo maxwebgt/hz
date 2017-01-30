@@ -1,8 +1,6 @@
 var mongoose = require('../libs/mgoose'),
 	Schema = mongoose.Schema;
 
-
-
 var schema = new Schema({
   username: {
     type: String,
@@ -18,6 +16,4 @@ var schema = new Schema({
     default: Date.now
   }
 });
-
-
 exports.User = mongoose.model('User', schema);
