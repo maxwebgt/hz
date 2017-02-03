@@ -174,12 +174,13 @@ var webSocketServer = new WebSocketServer.Server({
 webSocketServer.on('connection', function(ws) {
     var id = Math.random();
     clients[id] = ws;
-	var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
+
+    var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
     var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
     sessionStore.load(sid, function(err, session) {
         var did = new ObjectID(session.user);
         User.findById(did, function(err, user) {
-            console.log('ZZ:' + user.username);
+
                 otvet = {
                 	type: 'addonline',
 					author: user.username,
@@ -195,31 +196,52 @@ webSocketServer.on('connection', function(ws) {
 
 
 
-	// console.log('clients:', clients);
-    ws.on('message', function(message) {
-        console.log('//////////////////////////////////////////');
-        var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
-        var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-        sessionStore.load(sid, function(err, session) {
-            var did = new ObjectID(session.user);
 
-		User.findById(did, function(err, user) {
-                // otvet = {
-                //     author: user.username,
-                //     text: message,
-                //     date: new Date()
-                // };
-                otvet = {
-                	type: 'addmes',
-                    author: user.username,
-                    text: message,
-                    date: new Date()
-                };
-                for (var key in clients) {
-                    clients[key].send(JSON.stringify(otvet));
-                }
-            });
+    ws.on('message', function(message) {
+        var GG = trueUser(ws.upgradeReq.headers.cookie, function(sUser) {
+            console.log('i did');
+            console.log(sUser);
+            // var otvet = {
+            //     type: 'addmes',
+            //     author: user.username,
+            //     text: message,
+            //     date: new Date()
+            // };
+            // for (var key in clients) {
+            //     clients[key].send(JSON.stringify(otvet));
+            // }
+
+
         });
+        console.log('/////////GG//////////');
+        console.log(GG);
+        console.log('/////////GG//////////');
+
+        trueUserPromise(ws.upgradeReq.headers.cookie).then(function (sUser) {
+			GGG = sUser;
+        })
+        // var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
+        // var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
+        // sessionStore.load(sid, function(err, session) {
+        //     var did = new ObjectID(session.user);
+        //
+        // User.findById(did, function(err, user) {
+        //         // otvet = {
+        //         //     author: user.username,
+        //         //     text: message,
+        //         //     date: new Date()
+        //         // };
+        //         otvet = {
+        //         	type: 'addmes',
+        //             author: user.username,
+        //             text: message,
+        //             date: new Date()
+        //         };
+        //         for (var key in clients) {
+        //             clients[key].send(JSON.stringify(otvet));
+        //         }
+        //     });
+        // });
 
 
 
@@ -228,7 +250,6 @@ webSocketServer.on('connection', function(ws) {
     ws.on('close', function() {
         console.log('соединение закрыто ' + id);
         delete clients[id];
-
         var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
         var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
         sessionStore.load(sid, function(err, session) {
@@ -253,51 +274,36 @@ webSocketServer.on('connection', function(ws) {
 });
 
 
-
-// function trueUser(str) {
-//     var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
-//     var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-//
-//     sessionStore.load(sid, function(err, session) {
-//         var did = new ObjectID(session.user);
-//         User.findById(did, function(err, user) {
-//
-//             console.log('ZZ:' + user.username);
-//
-//         })
-//     });
-//
-// }
+function trueUser(str, callback) {
+    var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
+    var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
+    sessionStore.load(sid, function(err, session) {
+        var did = new ObjectID(session.user);
+        User.findById(did, function(err, user) {
+            sUser = user.username;
+            // console.log('ZZ:' + sUser);
+            callback(sUser);
+        })
+    })}
 
 
 
-
-
-// function trueUser(str) {
-//     var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
-//     var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-//     sessionStore.load(sid, function(err, session) {
-//         var did = new ObjectID(session.user);
-//         User.findById(did, function(err, user) {
-//             sUser = user.username;
-//             console.log('ZZ:' + sUser);
-//         })
-// 	});
-// 	return sUser;
-// }
-///////////////////// ROMAN
-// function trueUser(str, callback) {
-//     var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
-//     var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-//     sessionStore.load(sid, function(err, session) {
-//         var did = new ObjectID(session.user);
-//         User.findById(did, function(err, user) {
-//             sUser = user.username;
-//             console.log('ZZ:' + sUser);
-//             callback(sUser);
-//         })
-//     });
-// }
 // trueUser(str, (sUser) => {
 //     sUser // твой юзверь
 // })
+
+function trueUserPromise(str){
+    return new Promise(function(resolve, reject){
+        // reject(new Error("Rejected error"))
+        var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
+        var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
+        sessionStore.load(sid, function(err, session) {
+            var did = new ObjectID(session.user);
+            User.findById(did, function (err, user) {
+                sUser = user.username;
+                // console.log('ZZ:' + sUser);
+                resolve(sUser);
+            });
+        });
+	});
+}
