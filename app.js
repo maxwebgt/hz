@@ -179,41 +179,64 @@ webSocketServer.on('connection', function(ws) {
     clients[id] = ws;
 	console.log(id);
       trueUserPromise(ws.upgradeReq.headers.cookie).then(function (sUser) {
+///////////////////
 
-        var newonline = new mongoose.models.Online({username: sUser, lastonline: new Date()});
-        newonline.save(function(err, newonline ) {
-            if (err) throw err;
-            // console.log(newonline);
-            var otvet = {
-                type: 'addonline',
-                author: sUser,
-                date: new Date()
-            };
+          Online.findOne({username: sUser }, function(err, user) {
+              if (user) {
+              	console.log('user too connect');
+                  Online.find({}, function(err, users) {
+                      // console.log('find user: ' + users);
+                      clients[id].send(JSON.stringify({
+                          type: 'onlineAll',
+                          users: users
+                      }));
+                  });
+                  Mess.find({}, function (err, messages) {
+                      clients[id].send(JSON.stringify({
+                          type: 'messAll',
+                          messages: messages
+                      }));
+                  })
+			  }
+			  else
+			  {
+                  var newonline = new mongoose.models.Online({username: sUser, lastonline: new Date()});
+                  newonline.save(function(err, newonline ) {
+                      if (err) throw err;
+                      // console.log(newonline);
+                      var otvet = {
+                          type: 'addonline',
+                          author: sUser,
+                          date: new Date()
+                      };
 
-            for (var key in clients) {
-                if (key == id) {
-                    Online.find({}, function(err, users) {
-                        // console.log('find user: ' + users);
-                        clients[id].send(JSON.stringify({
-                            type: 'onlineAll',
-                            users: users
-                        }));
-                    });
-					Mess.find({}, function (err, messages) {
-                        clients[id].send(JSON.stringify({
-                            type: 'messAll',
-                            messages: messages
-                        }));
-                    })
-                }
-                else
-                {
-                    clients[key].send(JSON.stringify(otvet));
-                }
-            }
-        });
+                      for (var key in clients) {
+                          if (key == id) {
+                              Online.find({}, function(err, users) {
+                                  // console.log('find user: ' + users);
+                                  clients[id].send(JSON.stringify({
+                                      type: 'onlineAll',
+                                      users: users
+                                  }));
+                              });
+                              Mess.find({}, function (err, messages) {
+                                  clients[id].send(JSON.stringify({
+                                      type: 'messAll',
+                                      messages: messages
+                                  }));
+                              })
+                          }
+                          else
+                          {
+                              clients[key].send(JSON.stringify(otvet));
+                          }
+                      }
+                  });
+			  }
+          });
 
 
+///////////////////
 
 
 
