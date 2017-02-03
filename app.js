@@ -177,24 +177,46 @@ var webSocketServer = new WebSocketServer.Server({
 webSocketServer.on('connection', function(ws) {
     var id = Math.random();
     clients[id] = ws;
-
+	console.log(id);
       trueUserPromise(ws.upgradeReq.headers.cookie).then(function (sUser) {
 
         var newonline = new mongoose.models.Online({username: sUser, lastonline: new Date()});
         newonline.save(function(err, newonline ) {
             if (err) throw err;
-            console.log(newonline);
+            // console.log(newonline);
+            var otvet = {
+                type: 'addonline',
+                author: sUser,
+                date: new Date()
+            };
+
+            for (var key in clients) {
+                if (key == id) {
+                    Online.find({}, function(err, users) {
+                        // console.log('find user: ' + users);
+                        clients[id].send(JSON.stringify({
+                            type: 'onlineAll',
+                            users: users
+                        }));
+                    });
+					Mess.find({}, function (err, messages) {
+                        clients[id].send(JSON.stringify({
+                            type: 'messAll',
+                            messages: messages
+                        }));
+                    })
+                }
+                else
+                {
+                    clients[key].send(JSON.stringify(otvet));
+                }
+            }
         });
 
-        var otvet = {
-                        	type: 'addonline',
-            			author: sUser,
-                            date: new Date()
-                        };
-        for (var key in clients) {
-            clients[key].send(JSON.stringify(otvet));
-        }
-        console.log(sUser);
+
+
+
+
     });
 
 
@@ -209,7 +231,7 @@ webSocketServer.on('connection', function(ws) {
         	var newmess = new mongoose.models.Message({username: sUser, text: message});
             newmess.save(function(err, newmess) {
                 if (err) throw err;
-                console.log(newmess);
+                // console.log(newmess);
             });
 
             otvet = {
@@ -257,7 +279,7 @@ webSocketServer.on('connection', function(ws) {
             for (var key in clients) {
                 clients[key].send(JSON.stringify(otvet));
             }
-            console.log(sUser);
+            // console.log(sUser);
         });
 
 

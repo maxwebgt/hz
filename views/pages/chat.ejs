@@ -74,6 +74,20 @@
         if (msg.type === 'remonline') {
             document.querySelector('li[name=' + msg.author + ']').remove();
         }
+        if (msg.type === 'onlineAll') {
+//            console.log(msg.users);
+            msg.users.map(function (elem) {
+//                console.log(elem.username);
+//                console.log(elem.lastonline)
+                adduser(elem.username, elem.lastonline);
+            })
+        }
+        if (msg.type === 'messAll') {
+            msg.messages.map(function (elem) {
+                addMes(elem.username, elem.text, elem.created);
+                fix();
+            })
+        }
 
 
     };
