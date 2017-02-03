@@ -2,6 +2,9 @@ var express = require('express');
 var ObjectID = require('mongodb').ObjectID;
 var mongoose = require('./libs/mgoose');
 var User = require('./models/user').User;
+var Mess = require('./models/message').Message;
+var Online = require('./models/online').Online;
+
 
 var session = require("express-session");
 var bParser = require("body-parser");
@@ -175,73 +178,55 @@ webSocketServer.on('connection', function(ws) {
     var id = Math.random();
     clients[id] = ws;
 
-    var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
-    var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-    sessionStore.load(sid, function(err, session) {
-        var did = new ObjectID(session.user);
-        User.findById(did, function(err, user) {
+      trueUserPromise(ws.upgradeReq.headers.cookie).then(function (sUser) {
 
-                otvet = {
-                	type: 'addonline',
-					author: user.username,
-                    date: new Date()
-                };
-                for (var key in clients) {
-                    clients[key].send(JSON.stringify(otvet));
-                }
-        })
+        var newonline = new mongoose.models.Online({username: sUser, lastonline: new Date()});
+        newonline.save(function(err, newonline ) {
+            if (err) throw err;
+            console.log(newonline);
+        });
+
+        var otvet = {
+                        	type: 'addonline',
+            			author: sUser,
+                            date: new Date()
+                        };
+        for (var key in clients) {
+            clients[key].send(JSON.stringify(otvet));
+        }
+        console.log(sUser);
     });
 
 
 
 
-
-
     ws.on('message', function(message) {
-        var GG = trueUser(ws.upgradeReq.headers.cookie, function(sUser) {
-            console.log('i did');
-            console.log(sUser);
-            // var otvet = {
-            //     type: 'addmes',
-            //     author: user.username,
-            //     text: message,
-            //     date: new Date()
-            // };
-            // for (var key in clients) {
-            //     clients[key].send(JSON.stringify(otvet));
-            // }
-
-
-        });
-        console.log('/////////GG//////////');
-        console.log(GG);
-        console.log('/////////GG//////////');
 
         trueUserPromise(ws.upgradeReq.headers.cookie).then(function (sUser) {
-			GGG = sUser;
-        })
-        // var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
-        // var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-        // sessionStore.load(sid, function(err, session) {
-        //     var did = new ObjectID(session.user);
-        //
-        // User.findById(did, function(err, user) {
-        //         // otvet = {
-        //         //     author: user.username,
-        //         //     text: message,
-        //         //     date: new Date()
-        //         // };
-        //         otvet = {
-        //         	type: 'addmes',
-        //             author: user.username,
-        //             text: message,
-        //             date: new Date()
-        //         };
-        //         for (var key in clients) {
-        //             clients[key].send(JSON.stringify(otvet));
-        //         }
-        //     });
-        // });
+
+
+
+        	var newmess = new mongoose.models.Message({username: sUser, text: message});
+            newmess.save(function(err, newmess) {
+                if (err) throw err;
+                console.log(newmess);
+            });
+
+            otvet = {
+                        type: 'addmes',
+                        author: sUser,
+                        text: message,
+                        date: new Date()
+                    };
+            for (var key in clients) {
+				clients[key].send(JSON.stringify(otvet));
+			}
+        	console.log(sUser);
+        });
+
+
+
+
 
 
 
@@ -250,20 +235,29 @@ webSocketServer.on('connection', function(ws) {
     ws.on('close', function() {
         console.log('соединение закрыто ' + id);
         delete clients[id];
-        var cookies = cookie.parse(ws.upgradeReq.headers.cookie); // str = ws.upgradeReq.headers.cookie
-        var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-        sessionStore.load(sid, function(err, session) {
-            var did = new ObjectID(session.user);
 
-            User.findById(did, function(err, user) {
-                otvet = {
-                    type: 'remonline',
-                    author: user.username
-                };
-                for (var key in clients) {
-                    clients[key].send(JSON.stringify(otvet));
-                }
+        trueUserPromise(ws.upgradeReq.headers.cookie).then(function (sUser) {
+
+
+            Online.findOne({username: sUser}, function(err, user) {
+                console.log('find user: ' + user);
+                user.remove(function (err) {
+
+                    console.log('removed');
+                })
             });
+
+            otvet = {
+                            type: 'remonline',
+                            author: sUser
+                        };
+                        for (var key in clients) {
+                            clients[key].send(JSON.stringify(otvet));
+                        }
+            for (var key in clients) {
+                clients[key].send(JSON.stringify(otvet));
+            }
+            console.log(sUser);
         });
 
 
@@ -274,35 +268,14 @@ webSocketServer.on('connection', function(ws) {
 });
 
 
-function trueUser(str, callback) {
-    var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
-    var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
-    sessionStore.load(sid, function(err, session) {
-        var did = new ObjectID(session.user);
-        User.findById(did, function(err, user) {
-            sUser = user.username;
-            // console.log('ZZ:' + sUser);
-            callback(sUser);
-        })
-    })}
-
-
-
-// trueUser(str, (sUser) => {
-//     sUser // твой юзверь
-// })
-
 function trueUserPromise(str){
     return new Promise(function(resolve, reject){
-        // reject(new Error("Rejected error"))
         var cookies = cookie.parse(str); // str = ws.upgradeReq.headers.cookie
         var sid = cParser.signedCookie(cookies["connect.sid"], 'keybord cat');
         sessionStore.load(sid, function(err, session) {
             var did = new ObjectID(session.user);
             User.findById(did, function (err, user) {
-                sUser = user.username;
-                // console.log('ZZ:' + sUser);
-                resolve(sUser);
+                resolve(user.username);
             });
         });
 	});
