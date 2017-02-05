@@ -51,6 +51,8 @@
     </div>
 </div>
 <script>
+
+
     var socket = new WebSocket("ws://localhost:8081");
 
 
@@ -106,6 +108,9 @@
         messlist.appendChild(li).appendChild(div).appendChild(div2); //.appendChild(a).appendChild(img);
         div3 = createElement('div', {'class':'media-body'}, mess);
         div2.appendChild(div3);
+        console.log(typeof date);
+        date = new Date(date);
+        console.log (date);
         small = createElement('small', {'class':'text-muted'}, author + ' | ' + date);
         div2.appendChild(small);
         div2.appendChild(document.createElement('hr'));

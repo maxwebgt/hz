@@ -9,6 +9,10 @@ var schema = new Schema({
     lastonline: {
         type: Date,
         default: Date.now
+    },
+    conn: {
+        type: Number,
+        default: 1
     }
 });
 exports.Online= mongoose.model('Online', schema);

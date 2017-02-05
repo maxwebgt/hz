@@ -184,6 +184,11 @@ webSocketServer.on('connection', function(ws) {
           Online.findOne({username: sUser }, function(err, user) {
               if (user) {
               	console.log('user too connect');
+              	user.conn += 1;
+              	user.save(function (err, updatedTank) {
+                    if (err) return handleError(err);
+                    console.log('upd conn');
+                });
                   Online.find({}, function(err, users) {
                       // console.log('find user: ' + users);
                       clients[id].send(JSON.stringify({
@@ -254,18 +259,20 @@ webSocketServer.on('connection', function(ws) {
         	var newmess = new mongoose.models.Message({username: sUser, text: message});
             newmess.save(function(err, newmess) {
                 if (err) throw err;
-                // console.log(newmess);
+                console.log('new mess: '+ newmess);
+                console.log(typeof newmess.created);
+                otvet = {
+                    type: 'addmes',
+                    author: sUser,
+                    text: message,
+                    date: dataparse(newmess.created)
+                };
+                for (var key in clients) {
+                    clients[key].send(JSON.stringify(otvet));
+                }
             });
 
-            otvet = {
-                        type: 'addmes',
-                        author: sUser,
-                        text: message,
-                        date: new Date()
-                    };
-            for (var key in clients) {
-				clients[key].send(JSON.stringify(otvet));
-			}
+
         	console.log(sUser);
         });
 
@@ -286,22 +293,32 @@ webSocketServer.on('connection', function(ws) {
 
             Online.findOne({username: sUser}, function(err, user) {
                 console.log('find user: ' + user);
-                user.remove(function (err) {
+                if (user.conn > 1) {
+                    user.conn -=1;
+                    user.save(function (err) {
+                        console.log('-1 gg');
 
-                    console.log('removed');
-                })
+                    })
+                }
+                else {
+                    user.remove(function (err) {
+
+                        console.log('removed');
+                    })
+                    otvet = {
+                        type: 'remonline',
+                        author: sUser
+                    };
+                    for (var key in clients) {
+                        clients[key].send(JSON.stringify(otvet));
+                    }
+
+                }
+
+
             });
 
-            otvet = {
-                            type: 'remonline',
-                            author: sUser
-                        };
-                        for (var key in clients) {
-                            clients[key].send(JSON.stringify(otvet));
-                        }
-            for (var key in clients) {
-                clients[key].send(JSON.stringify(otvet));
-            }
+
             // console.log(sUser);
         });
 
@@ -325,3 +342,9 @@ function trueUserPromise(str){
         });
 	});
 }
+
+function dataparse(d) {
+    return datastring = d.getDate()  + "-" + (d.getMonth()+1) + "-" + d.getFullYear() + " " +
+        d.getHours() + ":" + d.getMinutes();
+}
+
