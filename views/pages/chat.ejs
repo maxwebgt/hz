@@ -52,12 +52,17 @@
 </div>
 <script>
 
-
+    inputmes.onkeydown = (event) => {
+      if (event.key == "Enter") {
+          (inputmes.value) ? sendMes(inputmes.value) : false;
+      }
+    }
     var socket = new WebSocket("ws://localhost:8081");
 
 
     function sendMes(str) {
         socket.send(str);
+        inputmes.value = '';
     }
 
     socket.onmessage = function(event) {
@@ -81,12 +86,12 @@
             msg.users.map(function (elem) {
 //                console.log(elem.username);
 //                console.log(elem.lastonline)
-                adduser(elem.username, elem.lastonline);
+                adduser(elem.username, dataparse(new Date(elem.lastonline)));
             })
         }
         if (msg.type === 'messAll') {
             msg.messages.map(function (elem) {
-                addMes(elem.username, elem.text, elem.created);
+                addMes(elem.username, elem.text, dataparse(new Date(elem.created)));
                 fix();
             })
         }
@@ -109,7 +114,7 @@
         div3 = createElement('div', {'class':'media-body'}, mess);
         div2.appendChild(div3);
         console.log(typeof date);
-        date = new Date(date);
+        //date = new Date(date);
         console.log (date);
         small = createElement('small', {'class':'text-muted'}, author + ' | ' + date);
         div2.appendChild(small);
@@ -164,6 +169,10 @@
             }
         }
         return el;
+    }
+    function dataparse(d) {
+        return datastring = d.getDate()  + "-" + (d.getMonth()+1) + "-" + d.getFullYear() + " " +
+            d.getHours() + ":" + d.getMinutes();
     }
 
 </script>

@@ -254,7 +254,7 @@ webSocketServer.on('connection', function(ws) {
 
         trueUserPromise(ws.upgradeReq.headers.cookie).then(function (sUser) {
 
-
+            if (!message) return;
 
         	var newmess = new mongoose.models.Message({username: sUser, text: message});
             newmess.save(function(err, newmess) {
@@ -265,7 +265,7 @@ webSocketServer.on('connection', function(ws) {
                     type: 'addmes',
                     author: sUser,
                     text: message,
-                    date: dataparse(newmess.created)
+                    date: newmess.created
                 };
                 for (var key in clients) {
                     clients[key].send(JSON.stringify(otvet));
@@ -343,8 +343,8 @@ function trueUserPromise(str){
 	});
 }
 
-function dataparse(d) {
-    return datastring = d.getDate()  + "-" + (d.getMonth()+1) + "-" + d.getFullYear() + " " +
-        d.getHours() + ":" + d.getMinutes();
-}
+// function dataparse(d) {
+//     return datastring = d.getDate()  + "-" + (d.getMonth()+1) + "-" + d.getFullYear() + " " +
+//         d.getHours() + ":" + d.getMinutes();
+// }
 
