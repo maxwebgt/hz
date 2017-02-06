@@ -34,7 +34,7 @@ app.get('/', function (req, res) {
 			res.redirect('/auth');
 		}
 		else {
-			res.render('pages/reg', { what: 'best', who: 'me' });
+			res.render('pages/reg', { port: config.http.port, host: config.http.host, method: config.http.method });
 		}
 });
 
@@ -72,7 +72,7 @@ app.get('/login', function (req, res) {
 			res.redirect('/auth');
 		}
 		else {
-			res.render('pages/login', { what: 'best', who: 'me' });
+			res.render('pages/login', { port: config.http.port, host: config.http.host, method: config.http.method });
 		}
 });
 
