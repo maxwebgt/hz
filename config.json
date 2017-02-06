@@ -1,0 +1,22 @@
+{
+  "mongoose": {
+    "uri": "mongodb://localhost/myauth",
+    "options": {
+      "server": {
+        "socketOptions": {
+          "keepAlive": 1
+        }
+      }
+    }
+  },
+  "socket": {
+    "host":"localhost",
+    "port":"8081",
+    "method":"ws"
+  },
+  "http": {
+    "host":"localhost",
+    "port":"8080",
+    "method":"none"
+  }
+}

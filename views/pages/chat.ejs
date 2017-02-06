@@ -62,8 +62,9 @@
         inputmes.value = '';
     }
     function connect() {
-        window.socket = new WebSocket("wss://websoketchat-maxwebgt.c9users.io:8081");
-       
+        window.socket = new WebSocket("<%= method + '://' + host + ':' + port %>");
+//       console.log(' ');
+
 
     socket.onclose = function(e) {
         console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
@@ -95,8 +96,6 @@
                 onlineUsers.removeChild(onlineUsers.lastChild);
             }
             msg.users.map(function (elem) {
-//                console.log(elem.username);
-//                console.log(elem.lastonline)
                 adduser(elem.username, dataparse(new Date(elem.lastonline)));
             })
         }
@@ -114,14 +113,10 @@
 
     };
     }
-    // window.socket = new WebSocket("wss://websoketchat-maxwebgt.c9users.io:8081");
+
     connect();
 
-    
 
-//    socket.onopen = function(event) {
-//       adduser('sssssss','last');
-//    };
 
     function addMes(author, mess, date) {
 
