@@ -60,7 +60,7 @@
 					if(xhr.status == 200) {
 						
 						if (xhr.responseText == 'success') {
-							location = 'https://websoketchat-maxwebgt.c9users.io/login';
+							location = '<%= host + ':' + port %>' + '/login';
 						}
 						else {
 							info.innerHTML =  xhr.responseText;

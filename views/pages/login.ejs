@@ -28,7 +28,7 @@
 				if (xhr.readyState == 4) {
 					if(xhr.status == 200) {
 						if (xhr.responseText == 'пароль верный') {
-							  location =  'https://websoketchat-maxwebgt.c9users.io/auth';
+							  location =  '<%= method + '://' + host + ':' + port %>' + '/auth';
 						}
 						else {
 							info.innerHTML =  xhr.responseText;	

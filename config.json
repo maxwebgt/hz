@@ -17,6 +17,6 @@
   "http": {
     "host":"localhost",
     "port":"8080",
-    "method":"none"
+    "method":"http"
   }
 }
