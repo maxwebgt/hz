@@ -30,12 +30,7 @@ app.use(require('./middleware/loadUser'));
 app.use(express.static('public'));
 
 app.get('/', function (req, res) {
-		if (req.session.user) {
-			res.redirect('/auth');
-		}
-		else {
-			res.render('pages/reg', { port: config.http.port, host: config.http.host, method: config.http.method });
-		}
+		req.session.user ? res.redirect('/auth') : res.render('pages/reg', { port: config.http.port, host: config.http.host, method: config.http.method })
 });
 
 app.post('/', function (req, res) {
@@ -68,12 +63,7 @@ app.post('/', function (req, res) {
 });
 
 app.get('/login', function (req, res) {
-	if (req.session.user) {
-			res.redirect('/auth');
-		}
-		else {
-			res.render('pages/login', { port: config.http.port, host: config.http.host, method: config.http.method });
-		}
+	req.session.user ? res.redirect('/auth') : res.render('pages/login', { port: config.http.port, host: config.http.host, method: config.http.method })
 });
 
 app.post('/login', function (req, res) {
@@ -111,43 +101,18 @@ app.get('/logout', function(req, res) {
 app.get('/auth', function(req, res) {
 	User.find({}, function(err, users) {
 		if (err) throw err;		
-		if (req.user) {
-			res.render('pages/auth', {arrayUsers: users});	
-		}
-		else {
-//			res.send('<h1>forbidden</h1>');
-			res.redirect('/');
-		}
+		(req.user) ? res.render('pages/auth', {arrayUsers: users}) : res.redirect('/');
 	})
 });
 
 app.get('/chat', function(req, res) {
-    if (req.session.user) {
-        res.render('pages/chat', { port: config.socket.port, host: config.socket.host, method: config.socket.method });
-
-    }
-    else {
-        res.redirect('/');
-    }
+    (req.session.user) ? res.render('pages/chat', { port: config.socket.port, host: config.socket.host, method: config.socket.method }) : res.redirect('/')
 });
 
+var portapp = process.env.PORT || config.http.port || 3000;
 
-
-
-app.get('/user/:id', function(req, res, next) {
-	try {
-		var id = new ObjectID(req.params.id);
-		User.findById(id, function(err, user) {
-			res.json(user);
-		});
-	} catch (e) {
-		res.send('User not found');
-	}	
-})
-
-    var portapp = process.env.PORT || config.http.port || 3000;
 app.listen(portapp, function () {
-  console.log('Example app listening on port '+ portapp);
+    console.log('Example app listening on port '+ portapp);
 });
 
 
