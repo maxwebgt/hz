@@ -156,8 +156,8 @@ app.get('/user/:id', function(req, res, next) {
 	}	
 })
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+app.listen(process.env.PORT, function () {
+  console.log('Example app listening on port '+ process.env.PORT);
 });
 
 
@@ -171,7 +171,9 @@ var webSocketServer = new WebSocketServer.Server({
     port: 8081
 });
 
-
+Online.remove({}, function () {
+    console.log('online db empty')
+});
 
 
 webSocketServer.on('connection', function(ws) {
@@ -337,6 +339,7 @@ function trueUserPromise(str){
         sessionStore.load(sid, function(err, session) {
             var did = new ObjectID(session.user);
             User.findById(did, function (err, user) {
+                if(err) console.log('error');
                 resolve(user.username);
             });
         });
