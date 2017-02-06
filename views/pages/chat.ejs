@@ -57,16 +57,24 @@
           (inputmes.value) ? sendMes(inputmes.value) : false;
       }
     }
-    var socket = new WebSocket("ws://localhost:8081");
-
-
-    function sendMes(str) {
+ function sendMes(str) {
         socket.send(str);
         inputmes.value = '';
     }
+    function connect() {
+        window.socket = new WebSocket("<%= method + '://' + host + ':' + port %>");
+//       console.log(' ');
+
+
+    socket.onclose = function(e) {
+        console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+        setTimeout(function() {
+            connect();
+        }, 1000)
+    };
 
     socket.onmessage = function(event) {
-        console.log(event.data);
+        // console.log(event.data);
         msg = JSON.parse(event.data);
 
         if (msg.type === 'addonline') {
@@ -75,7 +83,7 @@
             }
         }
         if (msg.type === 'addmes') {
-            addMes(msg.author, msg.text, msg.date);
+            addMes(msg.author, msg.text, dataparse(new Date(msg.date)));
             fix();
         }
         if (msg.type === 'remonline') {
@@ -83,13 +91,19 @@
         }
         if (msg.type === 'onlineAll') {
 //            console.log(msg.users);
+            
+            while (onlineUsers.lastChild) {
+                onlineUsers.removeChild(onlineUsers.lastChild);
+            }
             msg.users.map(function (elem) {
-//                console.log(elem.username);
-//                console.log(elem.lastonline)
                 adduser(elem.username, dataparse(new Date(elem.lastonline)));
             })
         }
         if (msg.type === 'messAll') {
+            
+            while (messlist.lastChild) {
+                messlist.removeChild(messlist.lastChild);
+            }
             msg.messages.map(function (elem) {
                 addMes(elem.username, elem.text, dataparse(new Date(elem.created)));
                 fix();
@@ -98,10 +112,11 @@
 
 
     };
+    }
 
-//    socket.onopen = function(event) {
-//       adduser('sssssss','last');
-//    };
+    connect();
+
+
 
     function addMes(author, mess, date) {
 
@@ -113,9 +128,9 @@
         messlist.appendChild(li).appendChild(div).appendChild(div2); //.appendChild(a).appendChild(img);
         div3 = createElement('div', {'class':'media-body'}, mess);
         div2.appendChild(div3);
-        console.log(typeof date);
+        // console.log(typeof date);
         //date = new Date(date);
-        console.log (date);
+        // console.log (date);
         small = createElement('small', {'class':'text-muted'}, author + ' | ' + date);
         div2.appendChild(small);
         div2.appendChild(document.createElement('hr'));

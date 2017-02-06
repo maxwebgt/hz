@@ -4,28 +4,18 @@ var mongoose = require('./libs/mgoose');
 var User = require('./models/user').User;
 var Mess = require('./models/message').Message;
 var Online = require('./models/online').Online;
-
-
 var session = require("express-session");
 var bParser = require("body-parser");
-
 var cookie = require('cookie');
-
 var cParser = require("cookie-parser");
-// var MongoStore = require('connect-mongo')(session);
-
 var sessionStore = require('./libs/sessionStore');
-
-// var trueUser = require('./libs/username');
-
+var config = require('./config.json'); //MAIN CONFIG!
 
 var app = express();
-
 
 app.engine('ejs', require('ejs-locals'));
 app.set('view engine', 'ejs');
 
-// app.use(cParser());
 app.use(session({
     secret: 'keybord cat',
     cookie: { maxAge: null},
@@ -34,11 +24,10 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }));
+
 app.use(bParser.urlencoded({ extended: false }));
 app.use(require('./middleware/loadUser'));
-
 app.use(express.static('public'));
-
 
 app.get('/', function (req, res) {
 		if (req.session.user) {
@@ -134,7 +123,7 @@ app.get('/auth', function(req, res) {
 
 app.get('/chat', function(req, res) {
     if (req.session.user) {
-        res.render('pages/chat', { what: 'best', who: 'me' });
+        res.render('pages/chat', { port: config.socket.port, host: config.socket.host, method: config.socket.method });
 
     }
     else {
@@ -156,22 +145,25 @@ app.get('/user/:id', function(req, res, next) {
 	}	
 })
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+    var portapp = process.env.PORT || config.http.port || 3000;
+app.listen(portapp, function () {
+  console.log('Example app listening on port '+ portapp);
 });
 
 
 var WebSocketServer = new require('ws');
 
-// подключенные клиенты
+
 var clients = {};
 
-// WebSocket-сервер на порту 8081
+
 var webSocketServer = new WebSocketServer.Server({
-    port: 8081
+    port: config.socket.port
 });
 
-
+Online.remove({}, function () {
+    console.log('online db empty')
+});
 
 
 webSocketServer.on('connection', function(ws) {
@@ -317,8 +309,6 @@ webSocketServer.on('connection', function(ws) {
 
 
             });
-
-
             // console.log(sUser);
         });
 
@@ -337,14 +327,9 @@ function trueUserPromise(str){
         sessionStore.load(sid, function(err, session) {
             var did = new ObjectID(session.user);
             User.findById(did, function (err, user) {
+                if(err) console.log('error');
                 resolve(user.username);
             });
         });
 	});
 }
-
-// function dataparse(d) {
-//     return datastring = d.getDate()  + "-" + (d.getMonth()+1) + "-" + d.getFullYear() + " " +
-//         d.getHours() + ":" + d.getMinutes();
-// }
-
